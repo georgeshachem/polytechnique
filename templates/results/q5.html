@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>INF559</title>
+    <link type="text/css" rel="stylesheet" href={{ url_for('static', filename="results/css/q.css" ) }}>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>Attribute</th>
+                <th>Type</th>
+            </tr>
+            <thead>
+            <tbody>
+                {%for result in query_result%}
+                <tr>
+                    <td>{{result[0]}}</td>
+                    <td>{{result[1]}}</td>
+                    <td>{{result[2]}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+    </table>
+
+    <blockquote> Results for database <span class="database-name">{{db_name}}</span> & table <span class="table-name">{{table_name}}</span></blockquote>
+</body>
+
+</html>
