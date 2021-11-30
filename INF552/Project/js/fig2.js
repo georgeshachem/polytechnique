@@ -42,7 +42,7 @@ var loadData = function (svg) {
         let room_types = Object.keys(ctx.filtered_data);
         var control = document.getElementById("control");
         for (const elt of room_types) {
-            ctx.room_types_checkbox[elt] = true;
+            ctx.room_types_checkbox[elt] = false;
 
             let elt_id = elt.replace(/ /g, "");
             var checkbox = document.createElement("input");
@@ -50,7 +50,7 @@ var loadData = function (svg) {
             checkbox.id = elt_id;
             checkbox.name = elt;
             checkbox.value = elt;
-            checkbox.checked = true;
+            checkbox.checked = false;
             checkbox.setAttribute("onchange", "updateCheckbox(this)");
 
             var label = document.createElement("label");
