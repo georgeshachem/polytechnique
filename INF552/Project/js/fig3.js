@@ -22,6 +22,8 @@ var createViz = function () {
             "transform",
             "translate(" + ctx.margin.left + "," + ctx.margin.top + ")"
         );
+    svg.append("g").attr("id", "bar_rect");
+    svg.append("g").attr("id", "text_label");
     loadData(svg);
 };
 
@@ -37,7 +39,8 @@ function getFormattedData(data) {
 }
 
 function update(data) {
-    let svg = d3.select("#bar_plot");
+    let bars_svg = d3.select("#bar_rect");
+    let text_svg = d3.select("#text_label");
 
     ctx.x.domain(
         data.map(function (d) {
@@ -58,8 +61,7 @@ function update(data) {
     ]);
     ctx.yAxis.transition().duration(1000).call(d3.axisLeft(ctx.y));
 
-    var u = svg.selectAll("rect").data(data);
-
+    var u = bars_svg.selectAll("rect").data(data);
     u.enter()
         .append("rect")
         .merge(u)
@@ -76,8 +78,26 @@ function update(data) {
             return ctx.h - ctx.y(d.value);
         })
         .attr("fill", "#69b3a2");
-
     u.exit().remove();
+
+    var t = text_svg.selectAll("text").data(data);
+    t.enter()
+        .append("text")
+        .merge(t)
+        .transition()
+        .duration(1000)
+        .attr("fill", "black")
+        .attr("x", function (d) {
+            return ctx.x(d.group) + 5;
+        })
+        .attr("y", function (d) {
+            return ctx.y(d.value) - 20;
+        })
+        .attr("dy", ".75em")
+        .text(function (d) {
+            return d.value;
+        });
+    t.exit().remove();
 }
 
 var loadData = function (svg) {
