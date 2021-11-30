@@ -98,97 +98,119 @@ var loadData = function (svg) {
                 .attr("text-anchor", "middle")
                 .attr("fill", "black");
 
-            // ['Entire home/apt', 'Private room', 'Shared room', 'Hotel room']
-
+            svg.append("g").attr("id", "points");
             drawPoints();
         });
     });
 };
 
 function drawPoints() {
-    var svg_check = document.getElementById("points");
-    if (svg_check) {
-        d3.select("#points").remove();
-    }
-    let svg = d3.select("#map").append("g").attr("id", "points");
+    let svg = d3.select("#points");
 
     let r = 1.5;
 
     if (ctx.room_types_checkbox["Entire home/apt"]) {
-        svg.append("g")
-            .selectAll("circle")
-            .data(ctx.filtered_data["Entire home/apt"])
-            .enter()
-            .append("circle")
-            .attr("r", r)
-            .attr("transform", function (d) {
-                return (
-                    "translate(" +
-                    ctx.projection([d.longitude, d.latitude]) +
-                    ")"
-                );
-            })
-            .on("mouseover", function (event, d) {
-                d3.select("div#info").text(
-                    `${d.name} (${d.id.toUpperCase()}) - ${d.room_type}`
-                );
-            })
-            .on("mouseout", function (event, d) {
-                d3.select("div#info").text("");
-            })
-            .attr("fill", "red");
+        console.log("a");
+        console.log(document.getElementById("g_entire_home"));
+        if (!document.getElementById("g_entire_home")) {
+            console.log("b");
+            svg.append("g")
+                .attr("id", "g_entire_home")
+                .selectAll("circle")
+                .data(ctx.filtered_data["Entire home/apt"])
+                .enter()
+                .append("circle")
+                .attr("r", r)
+                .attr("transform", function (d) {
+                    return (
+                        "translate(" +
+                        ctx.projection([d.longitude, d.latitude]) +
+                        ")"
+                    );
+                })
+                .on("mouseover", function (event, d) {
+                    d3.select("div#info").text(
+                        `${d.name} (${d.id.toUpperCase()}) - ${d.room_type}`
+                    );
+                })
+                .on("mouseout", function (event, d) {
+                    d3.select("div#info").text("");
+                })
+                .attr("fill", "red");
+        }
+    } else {
+        console.log("c");
+        d3.select("#g_entire_home").remove();
     }
 
     if (ctx.room_types_checkbox["Private room"]) {
-        svg.append("g")
-            .selectAll("circle")
-            .data(ctx.filtered_data["Private room"])
-            .enter()
-            .append("circle")
-            .attr("r", r)
-            .attr("transform", function (d) {
-                return (
-                    "translate(" +
-                    ctx.projection([d.longitude, d.latitude]) +
-                    ")"
-                );
-            })
-            .attr("fill", "blue");
+        console.log(1);
+        if (!document.getElementById("g_private_room")) {
+            console.log(2);
+            svg.append("g")
+                .attr("id", "g_private_room")
+                .selectAll("circle")
+                .data(ctx.filtered_data["Private room"])
+                .enter()
+                .append("circle")
+                .attr("r", r)
+                .attr("transform", function (d) {
+                    return (
+                        "translate(" +
+                        ctx.projection([d.longitude, d.latitude]) +
+                        ")"
+                    );
+                })
+                .attr("fill", "blue");
+        }
+    } else {
+        console.log(3);
+        d3.select("#g_private_room").remove();
     }
 
     if (ctx.room_types_checkbox["Hotel room"]) {
-        svg.append("g")
-            .selectAll("circle")
-            .data(ctx.filtered_data["Hotel room"])
-            .enter()
-            .append("circle")
-            .attr("r", r)
-            .attr("transform", function (d) {
-                return (
-                    "translate(" +
-                    ctx.projection([d.longitude, d.latitude]) +
-                    ")"
-                );
-            })
-            .attr("fill", "yellow");
+        if (!document.getElementById("g_hotel_room")) {
+            svg.append("g")
+                .attr("id", "g_hotel_room")
+                .selectAll("circle")
+                .data(ctx.filtered_data["Hotel room"])
+                .enter()
+                .append("circle")
+                .attr("r", r)
+                .attr("transform", function (d) {
+                    return (
+                        "translate(" +
+                        ctx.projection([d.longitude, d.latitude]) +
+                        ")"
+                    );
+                })
+                .attr("fill", "yellow");
+        }
+    } else {
+        d3.select("#g_hotel_room").remove();
     }
 
     if (ctx.room_types_checkbox["Shared room"]) {
-        svg.append("g")
-            .selectAll("rect")
-            .data(ctx.filtered_data["Shared room"])
-            .enter()
-            .append("rect")
-            .attr("width", r * 3)
-            .attr("height", r * 3)
-            .attr("transform", function (d) {
-                return (
-                    "translate(" +
-                    ctx.projection([d.longitude, d.latitude]) +
-                    ")"
-                );
-            })
-            .attr("fill", "green");
+        if (!document.getElementById("g_shared_room")) {
+            svg.append("g")
+                .attr("id", "g_shared_room")
+                .selectAll("rect")
+                .data(ctx.filtered_data["Shared room"])
+                .enter()
+                .append("rect")
+                .attr("width", r * 3)
+                .attr("height", r * 3)
+                .attr("transform", function (d) {
+                    return (
+                        "translate(" +
+                        ctx.projection([d.longitude, d.latitude]) +
+                        ")"
+                    );
+                })
+                .attr("fill", "green");
+        }
+    } else {
+        d3.select("#g_shared_room").remove();
     }
 }
 
