@@ -95,11 +95,12 @@ var loadData = function (svg) {
                 .style("stroke", "black")
                 .on("mouseover", function (event, d) {
                     let neighbourhood = d.properties.neighbourhood;
-                    let rank = neighbourhoods_rank
-                        .map(function (e) {
-                            return e.neighbourhood;
-                        })
-                        .indexOf(neighbourhood);
+                    let rank =
+                        neighbourhoods_rank
+                            .map(function (e) {
+                                return e.neighbourhood;
+                            })
+                            .indexOf(neighbourhood) + 1;
                     let avg = parseInt(prices_per_neighbourhood[neighbourhood]);
 
                     tooltip.style("visibility", "visible");
