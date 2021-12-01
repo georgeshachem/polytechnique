@@ -2,11 +2,15 @@ var ctx = {
     w: 1600,
     h: 800,
     margin: { top: 10, right: 30, bottom: 30, left: 40 },
+    data: null,
+    x: null,
+    y: null,
+    yAxis: null,
 };
 
 var createViz = function () {
     console.log("Using D3 v" + d3.version);
-    var svg = d3.select("#main").append("svg").attr("id", "histogram");
+    var svg = d3.select("#main").append("svg").attr("id", "svg_histogram");
     svg.attr("width", ctx.w + ctx.margin.left + ctx.margin.right);
     svg.attr("height", ctx.h + ctx.margin.top + ctx.margin.bottom);
     svg = svg
@@ -19,94 +23,99 @@ var createViz = function () {
     loadData(svg);
 };
 
-function median(values) {
-    if (values.length === 0) throw new Error("No inputs");
-
-    values.sort(function (a, b) {
-        return a - b;
-    });
-
-    var half = Math.floor(values.length / 2);
-
-    if (values.length % 2) return values[half];
-
-    return (values[half - 1] + values[half]) / 2.0;
-}
+const quantile = (arr, q) => {
+    arr = arr.map((elt) => elt.price);
+    const asc = (arr) => arr.sort((a, b) => a - b);
+    const sorted = asc(arr);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+        return sorted[base];
+    }
+};
 
 var loadData = function (svg) {
     d3.csv("../data/paris/listings-min.csv").then(function (data) {
-        var prices = [];
-        data = data.map((item) => {
-            prices.push(item.price);
+        ctx.data = data.map((item) => {
             return {
                 price: item.price,
             };
         });
 
-        console.log(d3.max(prices));
-
-        var x = d3
+        ctx.x = d3
             .scaleLinear()
-            .domain([d3.min(prices), d3.max(prices)])
+            .domain([
+                0,
+                d3.max(data, function (d) {
+                    return d.price;
+                }),
+            ])
             .range([0, ctx.w]);
         svg.append("g")
             .attr("transform", "translate(0," + ctx.h + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(ctx.x));
 
-        var histogram = d3
-            .histogram()
-            .value(function (d) {
-                return d.price;
-            })
-            .domain(x.domain())
-            .thresholds(x.ticks(70));
+        ctx.y = d3.scaleLinear().range([ctx.h, 0]);
+        ctx.yAxis = svg.append("g");
 
-        var bins = histogram(data);
+        d3.select("#nBin").on("input", function () {
+            update(this.value);
+        });
 
-        var y = d3.scaleLinear().range([ctx.h, 0]);
-        y.domain([
-            0,
-            d3.max(bins, function (d) {
-                return d.length;
-            }),
-        ]);
-        svg.append("g").call(d3.axisLeft(y));
-
-        let median_value = median(prices);
-
-        svg.selectAll("rect")
-            .data(bins)
-            .enter()
-            .append("rect")
-            .attr("x", 1)
-            .attr("transform", function (d) {
-                return "translate(" + x(d.x0) + "," + y(d.length) + ")";
-            })
-            .attr("width", function (d) {
-                return x(d.x1) - x(d.x0) - 1;
-            })
-            .attr("height", function (d) {
-                return ctx.h - y(d.length);
-            })
-            .style("fill", function (d) {
-                if (d.x0 < median_value) {
-                    return "orange";
-                } else {
-                    return "#69b3a2";
-                }
-            });
-
-        // svg.append("line")
-        //     .attr("x1", x(140))
-        //     .attr("x2", x(140))
-        //     .attr("y1", y(0))
-        //     .attr("y2", y(5000))
-        //     .attr("stroke", "grey")
-        //     .attr("stroke-dasharray", "4");
-        // svg.append("text")
-        //     .attr("x", x(140))
-        //     .attr("y", y(5000))
-        //     .text("threshold: 140")
-        //     .style("font-size", "15px");
+        update(20);
     });
 };
+
+function update(nBin) {
+    var svg = d3.select("#histogram");
+
+    var histogram = d3
+        .histogram()
+        .value(function (d) {
+            return d.price;
+        })
+        .domain(ctx.x.domain())
+        .thresholds(ctx.x.ticks(nBin));
+
+    var bins = histogram(ctx.data);
+
+    ctx.y.domain([
+        0,
+        d3.max(bins, function (d) {
+            return d.length;
+        }),
+    ]);
+    ctx.yAxis.transition().duration(1000).call(d3.axisLeft(ctx.y));
+
+    var u = svg.selectAll("rect").data(bins);
+
+    let percentile_value = quantile(ctx.data, 0.01);
+
+    u.enter()
+        .append("rect")
+        .merge(u)
+        .transition()
+        .duration(1000)
+        .attr("x", 1)
+        .attr("transform", function (d) {
+            return "translate(" + ctx.x(d.x0) + "," + ctx.y(d.length) + ")";
+        })
+        .attr("width", function (d) {
+            return ctx.x(d.x1) - ctx.x(d.x0) - 1;
+        })
+        .attr("height", function (d) {
+            return ctx.h - ctx.y(d.length);
+        })
+        .style("fill", function (d) {
+            if (d.x0 < percentile_value) {
+                return "orange";
+            } else {
+                return "#69b3a2";
+            }
+        });
+
+    u.exit().remove();
+}

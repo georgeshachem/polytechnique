@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>INF552 Project</title>
+        <!-- <link rel="stylesheet" href="style.css"> -->
+        <script src="https://d3js.org/d3.v7.min.js"></script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>INF552 Project</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+        <script src="../js/fig4.js"></script>
+    </head>
 
-    <script src="../js/fig4.js"></script>
-</head>
-
-<body onload="createViz()">
-    <div id="main">
-    </div>
-</body>
-
+    <body onload="createViz()">
+        <div id="main"></div>
+        <div id="footer">
+            <p>
+                <label>Value of bins </label>
+                <input
+                    type="number"
+                    min="0"
+                    max="200"
+                    step="30"
+                    value="30"
+                    id="nBin"
+                />
+            </p>
+        </div>
+    </body>
 </html>
