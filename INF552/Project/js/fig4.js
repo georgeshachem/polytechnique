@@ -65,7 +65,7 @@ var loadData = function (svg) {
             update(this.value);
         });
 
-        update(20);
+        update(30);
     });
 };
 
