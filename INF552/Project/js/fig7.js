@@ -126,8 +126,6 @@ async function drawPoints() {
 
         progress.attr("value", i++);
     }
-
-    date.text(`${key} - ${value.length} reviews - DONE`);
 }
 
 function randomInRange(from, to, fixed) {
