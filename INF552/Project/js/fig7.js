@@ -93,9 +93,13 @@ const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 async function drawPoints() {
     let svg = d3.select("#points");
     let date = d3.select("#date");
+    let progress = d3.select("#progress");
+
+    progress.style("visibility", "visible");
+    progress.attr("max", Object.keys(ctx.ordered_reviews).length);
 
     let r = 2;
-
+    let i = 0;
     for (const [key, value] of Object.entries(ctx.ordered_reviews)) {
         date.text(`${key} - ${value.length} reviews`);
         var u = svg.selectAll("circle").data(value);
@@ -103,7 +107,7 @@ async function drawPoints() {
             .append("circle")
             // .merge(u)
             // .transition()
-            // .duration(40)
+            // .duration(1)
             .attr("r", r)
             .attr("transform", function (d) {
                 return (
@@ -117,7 +121,9 @@ async function drawPoints() {
         // uncomment to remove old reviews
         // u.exit().remove();
 
-        await timer(20);
+        await timer(1);
+
+        progress.attr("value", i++);
     }
 }
 
