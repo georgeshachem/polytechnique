@@ -110,10 +110,7 @@ function drawPoints() {
     let r = 1.5;
 
     if (ctx.room_types_checkbox["Entire home/apt"]) {
-        console.log("a");
-        console.log(document.getElementById("g_entire_home"));
         if (!document.getElementById("g_entire_home")) {
-            console.log("b");
             svg.append("g")
                 .attr("id", "g_entire_home")
                 .selectAll("circle")
@@ -139,14 +136,11 @@ function drawPoints() {
                 .attr("fill", "red");
         }
     } else {
-        console.log("c");
         d3.select("#g_entire_home").remove();
     }
 
     if (ctx.room_types_checkbox["Private room"]) {
-        console.log(1);
         if (!document.getElementById("g_private_room")) {
-            console.log(2);
             svg.append("g")
                 .attr("id", "g_private_room")
                 .selectAll("circle")
@@ -164,7 +158,6 @@ function drawPoints() {
                 .attr("fill", "blue");
         }
     } else {
-        console.log(3);
         d3.select("#g_private_room").remove();
     }
 

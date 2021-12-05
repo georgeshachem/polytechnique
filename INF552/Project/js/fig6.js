@@ -202,6 +202,5 @@ var loadData = function (svg) {
 
 function togglePoints() {
     ctx.points_opacity = 1 - ctx.points_opacity;
-    console.log(ctx.points_opacity);
     d3.selectAll("circle").style("opacity", ctx.points_opacity.toString());
 }
