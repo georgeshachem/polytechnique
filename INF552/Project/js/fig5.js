@@ -70,7 +70,7 @@ var loadData = function (svg) {
         let max_value_nights = Math.max(...values_minimum_nights);
 
         width = ctx.w - ctx.margin.left - ctx.margin.right - 200;
-        height = ctx.h - ctx.margin.top - ctx.margin.bottom;
+        height = ctx.h - ctx.margin.top - ctx.margin.bottom - 50;
 
         var x = d3
             .scaleLinear()
@@ -84,6 +84,19 @@ var loadData = function (svg) {
         svg.append("g").call(d3.axisLeft(y));
 
         var z = d3.scaleLinear().domain([min_value, max_value]).range([4, 40]);
+
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("x", width / 2)
+            .attr("y", height + ctx.margin.top + 20)
+            .text("Average minimum nights required");
+
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -ctx.margin.left + 15)
+            .attr("x", -height / 2)
+            .text("Average availibility");
 
         var myColor = d3
             .scaleOrdinal()
@@ -123,19 +136,23 @@ var loadData = function (svg) {
             .style("background-color", "black")
             .style("border-radius", "5px")
             .style("padding", "10px")
-            .style("color", "white");
+            .style("color", "white")
+            .style("white-space", "pre-line");
 
         var showTooltip = function (d) {
             tooltip.transition().duration(200);
             tooltip
                 .style("opacity", 1)
                 .text(
-                    `Neighbourhood: ${d.neighbourhood} \n Availability: ${
+                    `Neighbourhood: ${
+                        d.neighbourhood
+                    } \n Availability: ${parseInt(
                         availability_per_neighbourhood[d.neighbourhood]
-                    } \n Count: ${count_per_neighbourhood[d.neighbourhood]}`
+                    )} \n Minimum nights: ${parseInt(
+                        minimum_night_per_neighbourhood[d.neighbourhood]
+                    )} \n Count: ${count_per_neighbourhood[d.neighbourhood]}`
                 )
                 .style("visibility", "visible")
-
                 .style("left", event.pageX + 30 + "px")
                 .style("top", event.pageY + 30 + "px");
         };
