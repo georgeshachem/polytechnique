@@ -1,7 +1,12 @@
 var ctx = {
     w: 1600,
     h: 800,
-    margin: { top: 10, right: 20, bottom: 30, left: 50 },
+    margin: {
+        top: 10,
+        right: 20,
+        bottom: 30,
+        left: 50,
+    },
 };
 
 var createViz = function () {
@@ -60,14 +65,20 @@ var loadData = function (svg) {
         }
 
         let neighbourhoods = Object.keys(availability_per_neighbourhood);
-        let values = Object.values(count_per_neighbourhood);
-        let min_value = Math.min(...values);
-        let max_value = Math.max(...values);
+
+        let values_availability = Object.values(count_per_neighbourhood);
+        let min_value_availability = Math.min(...values_availability);
+        let max_value_availability = Math.max(...values_availability);
+
         let values_minimum_nights = Object.values(
             minimum_night_per_neighbourhood
         );
         let min_value_nights = Math.min(...values_minimum_nights);
         let max_value_nights = Math.max(...values_minimum_nights);
+
+        let count = Object.values(count_per_neighbourhood);
+        let min_value_count = Math.min(...count);
+        let max_value_count = Math.max(...count);
 
         width = ctx.w - ctx.margin.left - ctx.margin.right - 200;
         height = ctx.h - ctx.margin.top - ctx.margin.bottom - 50;
@@ -83,7 +94,10 @@ var loadData = function (svg) {
         var y = d3.scaleLinear().domain([0, 365]).range([height, 0]);
         svg.append("g").call(d3.axisLeft(y));
 
-        var z = d3.scaleLinear().domain([min_value, max_value]).range([4, 40]);
+        var z = d3
+            .scaleLinear()
+            .domain([min_value_availability, max_value_availability])
+            .range([4, 40]);
 
         svg.append("text")
             .attr("text-anchor", "middle")
@@ -242,5 +256,59 @@ var loadData = function (svg) {
             .style("alignment-baseline", "middle")
             .on("mouseover", highlight)
             .on("mouseleave", noHighlight);
+
+        var size = d3
+            .scaleSqrt()
+            .domain([min_value_count-300, max_value_count+4000])
+            .range([1, 70]);
+
+        var valuesToShow = [1000, 2000, 5000];
+        var xCircle = ctx.w - ctx.margin.right - 150;
+        var xLabel = ctx.w - ctx.margin.right - 80;
+        var yCircle = ctx.h - ctx.margin.bottom - 125;
+        svg.selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function (d) {
+                return yCircle - size(d);
+            })
+            .attr("r", function (d) {
+                return size(d);
+            })
+            .style("fill", "none")
+            .attr("stroke", "black");
+
+        svg.selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("line")
+            .attr("x1", function (d) {
+                return xCircle + size(d);
+            })
+            .attr("x2", xLabel)
+            .attr("y1", function (d) {
+                return yCircle - size(d);
+            })
+            .attr("y2", function (d) {
+                return yCircle - size(d);
+            })
+            .attr("stroke", "black")
+            .style("stroke-dasharray", "2,2");
+
+        svg.selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("text")
+            .attr("x", xLabel)
+            .attr("y", function (d) {
+                return yCircle - size(d);
+            })
+            .text(function (d) {
+                return d;
+            })
+            .style("font-size", 10)
+            .attr("alignment-baseline", "middle");
     });
 };
