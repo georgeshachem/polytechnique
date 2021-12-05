@@ -147,7 +147,7 @@ var loadData = function (svg) {
             .on("mouseover", function (event, d) {
                 tooltip.style("visibility", "visible");
                 tooltip.text(
-                    `${d[0]} \n Min: ${d[1].min} \n Max: ${d[1].max} \n 25th: ${d[1].q1} \n Median: ${d[1].median} \n 75th: ${d[1].q3}`
+                    `${d[0]} \n Min: ${d[1].min} \n Max: ${d[1].max} \n 25th percentile: ${d[1].q1} \n Median: ${d[1].median} \n 75th percentile: ${d[1].q3} \n Inter Quantile Range: ${interQuantileRange}`
                 );
             })
             .on("mouseout", function () {
