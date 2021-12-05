@@ -114,6 +114,19 @@ var loadData = function (svg) {
             .attr("stroke", "black")
             .style("width", 40);
 
+        var tooltip = d3
+            .select("#main")
+            .append("div")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("padding-top", "3px")
+            .style("padding-bottom", "3px")
+            .style("padding-left", "3px")
+            .style("padding-right", "3px")
+            .style("border-style", "solid")
+            .style("background", "white")
+            .style("white-space", "pre-line");
+
         var boxWidth = ctx.w / neighbourhoods.length - 50;
         svg.selectAll("boxes")
             .data(sumstat)
@@ -130,7 +143,21 @@ var loadData = function (svg) {
             })
             .attr("width", boxWidth)
             .attr("stroke", "black")
-            .style("fill", "#69b3a2");
+            .style("fill", "#69b3a2")
+            .on("mouseover", function (event, d) {
+                tooltip.style("visibility", "visible");
+                tooltip.text(
+                    `${d[0]} \n Min: ${d[1].min} \n Max: ${d[1].max} \n 25th: ${d[1].q1} \n Median: ${d[1].median} \n 75th: ${d[1].q3}`
+                );
+            })
+            .on("mouseout", function () {
+                tooltip.style("visibility", "hidden");
+            })
+            .on("mousemove", function (event) {
+                tooltip
+                    .style("top", event.pageY + 25 + "px")
+                    .style("left", event.pageX + 25 + "px");
+            });
 
         svg.selectAll("medianLines")
             .data(sumstat)
