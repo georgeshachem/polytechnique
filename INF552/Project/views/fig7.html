@@ -16,8 +16,20 @@
         <div id="main"></div>
         <div id="footer">
             <button onclick="drawPoints()">Show reviews evolution</button>
-            <br>
-            <progress id="progress" value="0" max="100" style="visibility:hidden;"></progress>
+            <input
+                type="checkbox"
+                id="removeOld"
+                name="removeOld"
+                value="removeOld"
+            />
+            <label for="removeOld">Remove old reviews</label><br />
+            <br />
+            <progress
+                id="progress"
+                value="0"
+                max="100"
+                style="visibility: hidden;"
+            ></progress>
             <p id="date"></p>
         </div>
     </body>

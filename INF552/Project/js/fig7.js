@@ -94,6 +94,8 @@ async function drawPoints() {
     let svg = d3.select("#points");
     let date = d3.select("#date");
     let progress = d3.select("#progress");
+    let removeOld = d3.select("#removeOld");
+    console.log(removeOld);
 
     progress.style("visibility", "visible");
     progress.attr("max", Object.keys(ctx.ordered_reviews).length);
@@ -105,9 +107,6 @@ async function drawPoints() {
         var u = svg.selectAll("circle").data(value);
         u.enter()
             .append("circle")
-            // .merge(u)
-            // .transition()
-            // .duration(1)
             .attr("r", r)
             .attr("transform", function (d) {
                 return (
@@ -118,13 +117,17 @@ async function drawPoints() {
             })
             .attr("fill", getRandomColor());
 
-        // uncomment to remove old reviews
-        // u.exit().remove();
+        if (removeOld.node().checked) {
+            u.merge(u);
+            u.exit().remove();
+        }
 
         await timer(1);
 
         progress.attr("value", i++);
     }
+
+    date.text(`${key} - ${value.length} reviews - DONE`);
 }
 
 function randomInRange(from, to, fixed) {
