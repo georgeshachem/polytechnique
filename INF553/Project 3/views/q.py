@@ -7,8 +7,9 @@ import psycopg2
 def q1():
     db_name = request.args.get("d")
     if db_name:
-        con = psycopg2.connect(host=app.config['POSTGRES_HOST'], database=db_name,
-                               user=app.config['POSTGRES_USER'], password=app.config['POSTGRES_PASSWORD'], port=app.config['POSTGRES_PORT'])
+        config = app.config['POSTGRES_CONFIG']
+        con = psycopg2.connect(host=config["host"], database=db_name,
+                                user=config["user"], password=config["password"], port=config["port"])
         try:
             query = "SELECT relname FROM pg_stat_user_tables;"
             cur = con.cursor()
@@ -26,8 +27,9 @@ def q4():
     db_name = request.args.get("d")
     table_name = request.args.get("t")
     if db_name and table_name:
-        con = psycopg2.connect(host=app.config['POSTGRES_HOST'], database=db_name,
-                               user=app.config['POSTGRES_USER'], password=app.config['POSTGRES_PASSWORD'], port=app.config['POSTGRES_PORT'])
+        config = app.config['POSTGRES_CONFIG']
+        con = psycopg2.connect(host=config["host"], database=db_name,
+                                user=config["user"], password=config["password"], port=config["port"])
         try:
             query = """select
                             c.oid,
@@ -64,8 +66,9 @@ def q5():
     db_name = request.args.get("d")
     table_name = request.args.get("t")
     if db_name and table_name:
-        con = psycopg2.connect(host=app.config['POSTGRES_HOST'], database=db_name,
-                               user=app.config['POSTGRES_USER'], password=app.config['POSTGRES_PASSWORD'], port=app.config['POSTGRES_PORT'])
+        config = app.config['POSTGRES_CONFIG']
+        con = psycopg2.connect(host=config["host"], database=db_name,
+                                user=config["user"], password=config["password"], port=config["port"])
         try:
             query = """with mytables as (
                         select

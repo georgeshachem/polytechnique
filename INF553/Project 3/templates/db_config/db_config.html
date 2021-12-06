@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+    <head>
+        <meta charset="UTF-8" />
+        <title>INF559</title>
+        <link type="text/css" rel="stylesheet" href={{
+        url_for('static',filename="db_config/css/db_config.css" ) }}>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+        />
+    </head>
+    <body>
+        <div class="container">
+            <form id="db_config" action="" method="POST">
+                <h3>Configure database</h3>
+                <h4>
+                    There has been error connecting to or you haven't set up
+                    your database!
+                </h4>
+                <fieldset>
+                    <label for="postgres_host">Postgres Host</label><br />
+                    <input
+                        name="postgres_host"
+                        placeholder="Postgres Host"
+                        type="text"
+                        tabindex="1"
+                        required
+                        autofocus
+                        value="{{postgres_config['host']}}"
+                        id="postgres_host"
+                    />
+                </fieldset>
+                <fieldset>
+                    <label for="postgres_database">Postgres Database Name</label
+                    ><br />
+                    <input
+                        name="postgres_database"
+                        placeholder="Postgres Database Name"
+                        type="text"
+                        tabindex="2"
+                        value="{{postgres_config['database']}}"
+                        id="postgres_database"
+                    />
+                </fieldset>
+                <fieldset>
+                    <label for="postgres_user">Postgres User</label><br />
+                    <input
+                        name="postgres_user"
+                        placeholder="Postgres User"
+                        type="text"
+                        tabindex="3"
+                        value="{{postgres_config['user']}}"
+                        id="postgres_user"
+                    />
+                </fieldset>
+                <fieldset>
+                    <label for="postgres_password">Postgres Password</label
+                    ><br />
+                    <input
+                        name="postgres_password"
+                        placeholder="Postgres Password"
+                        type="password"
+                        tabindex="4"
+                        value="{{postgres_config['password']}}"
+                        id="postgres_password"
+                    />
+                    <i class="bi bi-eye-slash" id="togglePassword"></i>
+                </fieldset>
+                <fieldset>
+                    <label for="postgres_port">Postgres Port Number</label
+                    ><br />
+                    <input
+                        name="postgres_port"
+                        placeholder="Postgres Port Number"
+                        type="text"
+                        tabindex="5"
+                        value={{postgres_config['port']}}
+                        id="postgres_port"
+                    />
+                </fieldset>
+                <fieldset>
+                    <button
+                        name="submit"
+                        type="submit"
+                        id="db_config-submit"
+                        data-submit="...Sending"
+                    >
+                        Submit
+                    </button>
+                </fieldset>
+            </form>
+        </div>
+        <script src={{
+            url_for('static',filename="db_config/js/db_config.js" ) }}></script>
+    </body>
+</html>
