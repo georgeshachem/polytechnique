@@ -1,0 +1,4 @@
+1) First, we have to install python dependencies using "pip -r requirements.txt" or "python -m pip -r requirements.txt"
+2) To configure the database connection info, we can either just run the app because it will ask the user to input the info from the webpage OR edit the POSTGRES_CONFIG dictionary in config.py file 
+3) Finally, run "python main.py" to launch the app in debug mode on port 5000 by default
+4) Go to localhost:5000
