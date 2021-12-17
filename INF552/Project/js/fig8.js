@@ -116,15 +116,22 @@ var loadData = function (svg) {
             // points
 
             var highlight = function (d) {
+                host_id = d.path[0].__data__.host_id;
                 d3.selectAll("circle").style("opacity", 0);
-                d3.selectAll(".c" + d.path[0].__data__.host_id).style(
-                    "opacity",
-                    1
+                d3.selectAll(".c" + host_id).style("opacity", 1);
+                d3.select("#info").text(
+                    "Host " +
+                        host_id +
+                        " has " +
+                        formatted_data[host_id].length +
+                        " listings"
                 );
             };
 
             var noHighlight = function (d) {
                 d3.selectAll("circle").style("opacity", 1);
+                console.log();
+                d3.select("#info").text("");
             };
 
             svg.append("g")
