@@ -11,25 +11,27 @@
     <table>
         <thead>
             <tr>
-                <th>Table Name</th>
-                <th>Query 4</th>
-                <th>Query 5</th>
-                <th>Query 7</th>
+                <th>Table</th>
+                <th>Attribute</th>
+                <th>Distval</th>
+                <th>Min</th>
+                <th>Max</th>
             </tr>
             <thead>
             <tbody>
                 {%for result in query_result%}
                 <tr>
-                    <td>{{result}}</td>
-                    <td><a href="/q4?q={{result}}">Query 4</a></td>
-                    <td><a href="/q5?q={{result}}">Query 5</a></td>
-                    <td><a href="/q7?q={{result}}">Query 7</a></td>
+                    <td>{{result[0]}}</td>
+                    <td>{{result[1]}}</td>
+                    <td>{{result[2]}}</td>
+                    <td>{{result[3]}}</td>
+                    <td>{{result[4]}}</td>
                 </tr>
                 {%endfor%}
             </tbody>
     </table>
 
-    <blockquote> Results for database: <span class="database-name">{{db_name}}</span></blockquote>
+    <blockquote> Results for database <span class="database-name">{{db_name}}</span> & table <span class="table-name">{{table_name}}</span></blockquote>
 </body>
 
 </html>

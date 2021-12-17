@@ -9,7 +9,7 @@ def q1():
     if db_name:
         config = app.config['POSTGRES_CONFIG']
         con = psycopg2.connect(host=config["host"], database=db_name,
-                                user=config["user"], password=config["password"], port=config["port"])
+                               user=config["user"], password=config["password"], port=config["port"])
         try:
             query = "SELECT relname FROM pg_stat_user_tables;"
             cur = con.cursor()
@@ -29,7 +29,7 @@ def q4():
     if db_name and table_name:
         config = app.config['POSTGRES_CONFIG']
         con = psycopg2.connect(host=config["host"], database=db_name,
-                                user=config["user"], password=config["password"], port=config["port"])
+                               user=config["user"], password=config["password"], port=config["port"])
         try:
             query = """select
                             c.oid,
@@ -68,7 +68,7 @@ def q5():
     if db_name and table_name:
         config = app.config['POSTGRES_CONFIG']
         con = psycopg2.connect(host=config["host"], database=db_name,
-                                user=config["user"], password=config["password"], port=config["port"])
+                               user=config["user"], password=config["password"], port=config["port"])
         try:
             query = """with mytables as (
                         select
@@ -104,5 +104,84 @@ def q5():
         finally:
             con.close()
         return render_template('results/q5.html', db_name=db_name, table_name=table_name, query_result=query_result)
+    else:
+        return "No database or table name provided"
+
+
+@app.route("/q7")
+def q7():
+    db_name = request.args.get("d")
+    table_name = request.args.get("t")
+    if db_name and table_name:
+        config = app.config['POSTGRES_CONFIG']
+        con = psycopg2.connect(host=config["host"], database=db_name,
+                               user=config["user"], password=config["password"], port=config["port"])
+        try:
+            query = """with mytables as (
+                    select
+                        c.oid,
+                        c.relname
+                    from
+                        pg_class c,
+                        pg_namespace n
+                    where
+                        c.relkind = 'r'
+                        and n.oid = c.relnamespace
+                        and not(
+                            nspname like 'pg_%%'
+                            or nspname = 'information_schema'
+                        )
+                ),
+                myattr as (
+                    select
+                        t.relname,
+                        a.attname,
+                        y.typname
+                    from
+                        mytables t,
+                        pg_attribute a,
+                        pg_type y
+                    where
+                        t.oid = a.attrelid
+                        and a.atttypid = y.oid
+                        and y.typname = 'varchar'
+                    limit
+                        5
+                ), aux as (
+                    select
+                        tablename,
+                        attname,
+                        n_distinct as ndist,
+                        histogram_bounds :: text :: varchar [] as bound
+                    from
+                        pg_stats
+                    where
+                        (tablename, attname) in (
+                            select
+                                relname,
+                                attname
+                            from
+                                myattr
+                        )
+                )
+                select
+                    tablename,
+                    attname,
+                    ceil(ndist *(-1) * n_live_tup) as distval,
+                    bound [1] as min,
+                    bound [array_length(bound,
+                1)] as max
+                from
+                    aux,
+                    pg_stat_user_tables
+                where
+                    pg_stat_user_tables.relname = aux.tablename
+                    AND pg_stat_user_tables.relname = %s;"""
+            cur = con.cursor()
+            cur.execute(query, (table_name, ))
+            query_result = cur.fetchall()
+        finally:
+            con.close()
+        return render_template('results/q7.html', db_name=db_name, table_name=table_name, query_result=query_result)
     else:
         return "No database or table name provided"

@@ -9,37 +9,46 @@ table {
     margin: 0 auto;
     position: relative;
 }
+
 table * {
     position: relative;
 }
+
 table td,
 table th {
     padding-left: 8px;
 }
+
 table thead tr {
     height: 60px;
     background: #ffed86;
     font-size: 16px;
 }
+
 table tbody tr {
     height: 48px;
     border-bottom: 1px solid #e3f1d5;
 }
+
 table tbody tr:last-child {
     border: 0;
 }
+
 table td,
 table th {
     text-align: left;
 }
+
 table td.l,
 table th.l {
     text-align: right;
 }
+
 table td.c,
 table th.c {
     text-align: center;
 }
+
 table td.r,
 table th.r {
     text-align: center;
@@ -49,26 +58,32 @@ table th.r {
     table {
         display: block;
     }
+
     table > *,
     table tr,
     table td,
     table th {
         display: block;
     }
+
     table thead {
         display: none;
     }
+
     table tbody tr {
         height: auto;
         padding: 8px 0;
     }
+
     table tbody tr td {
         padding-left: 45%;
         margin-bottom: 12px;
     }
+
     table tbody tr td:last-child {
         margin-bottom: 0;
     }
+
     table tbody tr td:before {
         position: absolute;
         font-weight: 700;
@@ -76,22 +91,28 @@ table th.r {
         left: 10px;
         top: 0;
     }
+
     table tbody tr td:nth-child(1):before {
         content: "Code";
     }
+
     table tbody tr td:nth-child(2):before {
         content: "Stock";
     }
+
     table tbody tr td:nth-child(3):before {
         content: "Cap";
     }
+
     table tbody tr td:nth-child(4):before {
         content: "Inch";
     }
+
     table tbody tr td:nth-child(5):before {
         content: "Box Type";
     }
 }
+
 body {
     background: #3745c2;
     font: 400 14px "Calibri", "Arial";
@@ -109,6 +130,22 @@ blockquote {
 }
 
 .table-name {
-    background: #ABB1E7;
+    background: #abb1e7;
     color: #000000;
+}
+
+.button {
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button1 {
+    background-color: #4caf50;
 }
