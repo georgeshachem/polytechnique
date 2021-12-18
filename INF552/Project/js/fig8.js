@@ -103,6 +103,9 @@ var loadData = function (svg) {
                 .scaleExtent([0.5, 8])
                 .on("zoom", function (event) {
                     svg.attr("transform", event.transform);
+                    d3.selectAll("circle")
+                        .attr("d", path.projection(projection))
+                        .attr("r", 4 / event.transform.k);
                 });
             d3.select("#map").call(zoom);
 
