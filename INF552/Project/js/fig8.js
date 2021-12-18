@@ -8,6 +8,7 @@ var createViz = function () {
     var svg = d3.select("#main").append("svg").attr("id", "map");
     svg.attr("width", ctx.w);
     svg.attr("height", ctx.h);
+    svg = svg.append("g").attr("id", "map_g");
     loadData(svg);
 };
 
@@ -20,6 +21,7 @@ var loadData = function (svg) {
                     id: elt.id,
                     latitude: elt.latitude,
                     longitude: elt.longitude,
+                    host_name: elt.host_name,
                 });
             } else {
                 preload_data[elt.host_id] = [
@@ -27,6 +29,7 @@ var loadData = function (svg) {
                         id: elt.id,
                         latitude: elt.latitude,
                         longitude: elt.longitude,
+                        host_name: elt.host_name,
                     },
                 ];
             }
@@ -43,6 +46,7 @@ var loadData = function (svg) {
                         latitude: elt.latitude,
                         longitude: elt.longitude,
                         host_id: key,
+                        host_name: elt.host_name,
                     });
                 }
             }
@@ -94,6 +98,14 @@ var loadData = function (svg) {
                 .attr("d", d3.geoPath().projection(projection))
                 .style("stroke", "black");
 
+            var zoom = d3
+                .zoom()
+                .scaleExtent([0.5, 8])
+                .on("zoom", function (event) {
+                    svg.attr("transform", event.transform);
+                });
+            d3.select("#map").call(zoom);
+
             svg.append("g")
                 .selectAll("text")
                 .data(data.features)
@@ -117,11 +129,12 @@ var loadData = function (svg) {
 
             var highlight = function (d) {
                 host_id = d.path[0].__data__.host_id;
+                let host_name = d.path[0].__data__.host_name;
                 d3.selectAll("circle").style("opacity", 0);
                 d3.selectAll(".c" + host_id).style("opacity", 1);
                 d3.select("#info").text(
                     "Host " +
-                        host_id +
+                        host_name +
                         " has " +
                         formatted_data[host_id].length +
                         " listings"
@@ -130,7 +143,6 @@ var loadData = function (svg) {
 
             var noHighlight = function (d) {
                 d3.selectAll("circle").style("opacity", 1);
-                console.log();
                 d3.select("#info").text("");
             };
 
