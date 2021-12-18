@@ -199,6 +199,7 @@ var loadData = function (svg) {
             .style("fill", function (d) {
                 return myColor(d.neighbourhood);
             })
+            .style("opacity", 0.1)
             .on("mouseover", function (event, d) {
                 showTooltip(d);
             })
