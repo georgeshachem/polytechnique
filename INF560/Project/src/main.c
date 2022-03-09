@@ -89,13 +89,22 @@ int main(int argc, char **argv)
         int task;
         int dest_rank;
 
-        for (task = 0; task < image->n_images; task++)
+        if (size > 1)
         {
-            int ready;
-            MPI_Recv(&ready, 1, MPI_INTEGER, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            dest_rank = ready;
-            MPI_Irecv(image->p[task], image->height[task] * image->width[task], MPI_Pixel, dest_rank, 0, MPI_COMM_WORLD, &req[task]);
-            MPI_Send(&task, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
+            for (task = 0; task < image->n_images; task++)
+            {
+                int ready;
+                MPI_Recv(&ready, 1, MPI_INTEGER, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                dest_rank = ready;
+                MPI_Irecv(image->p[task], image->height[task] * image->width[task], MPI_Pixel, dest_rank, 0, MPI_COMM_WORLD, &req[task]);
+                MPI_Send(&task, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
+            }
+        }
+        else
+        {
+            apply_gray_filter_gif(image);
+            apply_blur_filter_gif(image, 5, 20);
+            apply_sobel_filter_gif(image);
         }
 
         /* send a message that tell the workers to stop */
@@ -108,8 +117,11 @@ int main(int argc, char **argv)
             MPI_Send(&stop_value, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
         }
 
-        /* wait until all the results are received */
-        MPI_Waitall(image->n_images, req, MPI_STATUSES_IGNORE);
+        if (size > 1)
+        {
+            /* wait until all the results are received */
+            MPI_Waitall(image->n_images, req, MPI_STATUSES_IGNORE);
+        }
 
         /* End of MPI */
 
