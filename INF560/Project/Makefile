@@ -39,3 +39,17 @@ sobelf:$(OBJ)
 
 clean:
 	rm -f sobelf $(OBJ)
+
+count:
+	ls images/processed/ | wc -l
+
+run:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test.sh
+
+fullclean:
+	make clean
+	./clean_test.sh
+	clear
