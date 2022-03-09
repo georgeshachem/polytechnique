@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     gettimeofday(&t1, NULL);
 
     /* Convert the pixels into grayscale */
-    apply_gray_filter(image);
+    apply_gray_filter_gif(image);
 
     /* Apply blur filter with convergence value */
     apply_blur_filter(image, 5, 20);

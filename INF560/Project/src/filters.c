@@ -4,34 +4,42 @@
 /* Set this macro to 1 to enable debugging information */
 #define SOBELF_DEBUG 0
 
-void apply_gray_filter(animated_gif *image)
+#define CONV(l, c, nb_c) \
+    (l) * (nb_c) + (c)
+
+void apply_gray_filter_image(pixel *p, int size_img)
 {
-    int i, j;
+    int j;
+
+    for (j = 0; j < size_img; j++)
+    {
+        int moy;
+
+        moy = (p[j].r + p[j].g + p[j].b) / 3;
+        if (moy < 0)
+            moy = 0;
+        if (moy > 255)
+            moy = 255;
+
+        p[j].r = moy;
+        p[j].g = moy;
+        p[j].b = moy;
+    }
+}
+
+void apply_gray_filter_gif(animated_gif *image)
+{
+    int i, size_img;
     pixel **p;
 
     p = image->p;
 
     for (i = 0; i < image->n_images; i++)
     {
-        for (j = 0; j < image->width[i] * image->height[i]; j++)
-        {
-            int moy;
-
-            moy = (p[i][j].r + p[i][j].g + p[i][j].b) / 3;
-            if (moy < 0)
-                moy = 0;
-            if (moy > 255)
-                moy = 255;
-
-            p[i][j].r = moy;
-            p[i][j].g = moy;
-            p[i][j].b = moy;
-        }
+        size_img = image->width[i] * image->height[i];
+        apply_gray_filter_image(p[i], size_img);
     }
 }
-
-#define CONV(l, c, nb_c) \
-    (l) * (nb_c) + (c)
 
 void apply_gray_line(animated_gif *image)
 {
