@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     apply_blur_filter(image, 5, 20);
 
     /* Apply sobel filter on pixels */
-    apply_sobel_filter(image);
+    apply_sobel_filter_gif(image);
 
     /* FILTER Timer stop */
     gettimeofday(&t2, NULL);
