@@ -28,6 +28,23 @@ int main(int argc, char **argv)
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    /* Custom DataType MPI_Pixel */
+    int count = 3;
+    int array_of_blocklengths[] = {1, 1, 1};
+    MPI_Aint array_of_displacements[] = {offsetof(pixel, r),
+                                         offsetof(pixel, g),
+                                         offsetof(pixel, b)};
+    MPI_Datatype array_of_types[] = {MPI_INTEGER, MPI_INTEGER, MPI_INTEGER};
+    MPI_Datatype tmp_type, MPI_Pixel;
+    MPI_Aint lb, extent;
+    MPI_Type_create_struct(count, array_of_blocklengths, array_of_displacements,
+                           array_of_types, &tmp_type);
+    MPI_Type_get_extent(tmp_type, &lb, &extent);
+    MPI_Type_create_resized(tmp_type, lb, extent, &MPI_Pixel);
+    MPI_Type_commit(&MPI_Pixel);
+    /* Custom DataType MPI_Pixel */
+
     /* End MPI Config */
 
     /* Check command-line arguments */
@@ -37,20 +54,20 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    input_filename = argv[1];
+    output_filename = argv[2];
+
+    /* Load file and store the pixels in array */
+    image = load_pixels(input_filename);
+    if (image == NULL)
+    {
+        return 1;
+    }
+
     if (rank == 0)
     {
-        input_filename = argv[1];
-        output_filename = argv[2];
-
         /* IMPORT Timer start */
         gettimeofday(&t1, NULL);
-
-        /* Load file and store the pixels in array */
-        image = load_pixels(input_filename);
-        if (image == NULL)
-        {
-            return 1;
-        }
 
         /* IMPORT Timer stop */
         gettimeofday(&t2, NULL);
@@ -63,14 +80,38 @@ int main(int argc, char **argv)
         /* FILTER Timer start */
         gettimeofday(&t1, NULL);
 
-        /* Convert the pixels into grayscale */
-        apply_gray_filter_gif(image);
+        /* Start of MPI */
 
-        /* Apply blur filter with convergence value */
-        apply_blur_filter_gif(image, 5, 20);
+        /* MPI Variables */
+        MPI_Request *req = malloc(sizeof(MPI_Request) * image->n_images);
 
-        /* Apply sobel filter on pixels */
-        apply_sobel_filter_gif(image);
+        /* send the tasks */
+        int task;
+        int dest_rank;
+
+        for (task = 0; task < image->n_images; task++)
+        {
+            int ready;
+            MPI_Recv(&ready, 1, MPI_INTEGER, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            dest_rank = ready;
+            MPI_Irecv(image->p[task], image->height[task] * image->width[task], MPI_Pixel, dest_rank, 0, MPI_COMM_WORLD, &req[task]);
+            MPI_Send(&task, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
+        }
+
+        /* send a message that tell the workers to stop */
+        for (dest_rank = 1; dest_rank < size; dest_rank++)
+        {
+            int ready;
+            MPI_Recv(&ready, 1, MPI_INTEGER, dest_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            int stop_value = -1;
+            MPI_Send(&stop_value, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
+        }
+
+        /* wait until all the results are received */
+        MPI_Waitall(image->n_images, req, MPI_STATUSES_IGNORE);
+
+        /* End of MPI */
 
         /* FILTER Timer stop */
         gettimeofday(&t2, NULL);
@@ -95,7 +136,23 @@ int main(int argc, char **argv)
 
         printf("Export done in %lf s in file %s\n", duration, output_filename);
     }
-
+    else
+    {
+        int img_idx;
+        while (1)
+        {
+            MPI_Send(&rank, 1, MPI_INTEGER, 0, 1, MPI_COMM_WORLD);
+            MPI_Recv(&img_idx, 1, MPI_INTEGER, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            if (img_idx == -1)
+            {
+                break;
+            }
+            apply_gray_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+            apply_blur_filter_image(image->p[img_idx], 5, 20, image->width[img_idx], image->height[img_idx]);
+            apply_sobel_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+            MPI_Send(image->p[img_idx], image->height[img_idx] * image->width[img_idx], MPI_Pixel, 0, 0, MPI_COMM_WORLD);
+        }
+    }
     MPI_Finalize();
     return 0;
 }
