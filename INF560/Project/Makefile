@@ -4,7 +4,7 @@ OBJ_DIR=obj
 
 # CC=gcc
 CC=mpicc
-CFLAGS=-O3 -I$(HEADER_DIR)
+CFLAGS=-O3 -I$(HEADER_DIR) -fopenmp
 LDFLAGS=-lm
 
 SRC= dgif_lib.c \
@@ -55,6 +55,18 @@ mpi:
 	./clean_test.sh
 	clear
 	./run_test_mpi.sh
+
+omp:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_omp.sh
+
+hybrid:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_hybrid.sh
 
 fullclean:
 	make clean
