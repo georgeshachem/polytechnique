@@ -7,9 +7,10 @@
 #define CONV(l, c, nb_c) \
     (l) * (nb_c) + (c)
 
-void apply_gray_filter_image(pixel *p, int size_img)
+void apply_gray_filter_image(pixel *p, int width, int height)
 {
     int j;
+    int size_img = width * height;
 
     for (j = 0; j < size_img; j++)
     {
@@ -29,15 +30,14 @@ void apply_gray_filter_image(pixel *p, int size_img)
 
 void apply_gray_filter_gif(animated_gif *image)
 {
-    int i, size_img;
+    int i;
     pixel **p;
 
     p = image->p;
 
     for (i = 0; i < image->n_images; i++)
     {
-        size_img = image->width[i] * image->height[i];
-        apply_gray_filter_image(p[i], size_img);
+        apply_gray_filter_image(p[i], image->width[i], image->height[i]);
     }
 }
 
@@ -273,13 +273,14 @@ void apply_sobel_filter_image(pixel *p, int width, int height)
 
 void apply_sobel_filter_gif(animated_gif *image)
 {
-    int i, j, k;
+    int i;
     int width, height;
 
+    /* Get the pixels of all images */
     pixel **p;
-
     p = image->p;
 
+    /* Process all images */
     for (i = 0; i < image->n_images; i++)
     {
         width = image->width[i];
