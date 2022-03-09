@@ -2,7 +2,8 @@ SRC_DIR=src
 HEADER_DIR=include
 OBJ_DIR=obj
 
-CC=gcc
+# CC=gcc
+CC=mpicc
 CFLAGS=-O3 -I$(HEADER_DIR)
 LDFLAGS=-lm
 
@@ -48,6 +49,12 @@ run:
 	./clean_test.sh
 	clear
 	./run_test.sh
+
+mpi:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_mpi.sh
 
 fullclean:
 	make clean

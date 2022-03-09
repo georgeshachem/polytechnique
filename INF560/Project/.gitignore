@@ -1,4 +1,8 @@
+# Folders
 obj/
 ignored/
 images/processed
+
+# Files
 sobelf
+set_env.sh
