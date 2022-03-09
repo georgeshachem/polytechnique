@@ -6,3 +6,4 @@ images/processed
 # Files
 sobelf
 set_env.sh
+.nfs*
