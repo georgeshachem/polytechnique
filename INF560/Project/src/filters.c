@@ -35,6 +35,7 @@ void apply_gray_filter_gif(animated_gif *image)
 
     p = image->p;
 
+#pragma omp parallel for schedule(static) private(i)
     for (i = 0; i < image->n_images; i++)
     {
         apply_gray_filter_image(p[i], image->width[i], image->height[i]);
@@ -204,6 +205,7 @@ void apply_blur_filter_gif(animated_gif *image, int size, int threshold)
     p = image->p;
 
     /* Process all images */
+#pragma omp parallel for schedule(static) private(i, width, height)
     for (i = 0; i < image->n_images; i++)
     {
         width = image->width[i];
@@ -290,6 +292,7 @@ void apply_sobel_filter_gif(animated_gif *image)
     p = image->p;
 
     /* Process all images */
+#pragma omp parallel for schedule(static) private(i, width, height)
     for (i = 0; i < image->n_images; i++)
     {
         width = image->width[i];
