@@ -1,5 +1,4 @@
-#include <math.h>
-#include "utils.c"
+#include "filters.h"
 
 /* Set this macro to 1 to enable debugging information */
 #define SOBELF_DEBUG 0

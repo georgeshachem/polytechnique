@@ -6,11 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-
 #include "gif_lib.h"
-#include "filters.c"
 
-#include <mpi.h>
+#include "filters.h"
+#include "cfilters.h"
+#include "utils.h"
+#include "pgdatatypes.h"
 
 /*
  * Main entry point
