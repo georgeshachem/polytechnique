@@ -84,6 +84,16 @@ hybrid:
 	clear
 	./run_test_hybrid.sh
 
+cuda:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_cuda.sh
+
+cudafix:
+	export CPATH=$CPATH:/usr/local/cuda/include
+	export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/cuda/lib64
+
 fullclean:
 	make clean
 	./clean_test.sh
