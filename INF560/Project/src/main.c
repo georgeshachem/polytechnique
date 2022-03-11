@@ -161,9 +161,10 @@ int main(int argc, char **argv)
             {
                 break;
             }
-            apply_gray_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
-            apply_blur_filter_image(image->p[img_idx], 5, 20, image->width[img_idx], image->height[img_idx]);
-            apply_sobel_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+            // apply_gray_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+            // apply_blur_filter_image(image->p[img_idx], 5, 20, image->width[img_idx], image->height[img_idx]);
+            // apply_sobel_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+            apply_all_filters_image_gpu(image, img_idx, 5, 20);
             MPI_Send(image->p[img_idx], image->height[img_idx] * image->width[img_idx], MPI_Pixel, 0, 0, MPI_COMM_WORLD);
         }
     }

@@ -8,7 +8,7 @@
 #define CONV(l, c, nb_c) \
     (l) * (nb_c) + (c)
 
-__global__ void apply_gray_filter_image_gpu(pixel *p, int width, int height)
+__global__ void apply_gray_filter_image_gpu_kernel(pixel *p, int width, int height)
 {
     int j = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -28,7 +28,7 @@ __global__ void apply_gray_filter_image_gpu(pixel *p, int width, int height)
     }
 }
 
-__global__ void apply_blur_filter_image_gpu(pixel *p, pixel *p_new, int *end,
+__global__ void apply_blur_filter_image_gpu_kernel(pixel *p, pixel *p_new, int *end,
                                             int width, int height, int size, int threshold)
 {
     int position = threadIdx.x + blockIdx.x * blockDim.x;
@@ -103,7 +103,7 @@ __global__ void apply_blur_filter_image_gpu(pixel *p, pixel *p_new, int *end,
     }
 }
 
-__global__ void apply_sobel_filter_image_gpu(pixel *p, pixel *p_new, int width, int height)
+__global__ void apply_sobel_filter_image_gpu_kernel(pixel *p, pixel *p_new, int width, int height)
 {
     int position = threadIdx.x + blockIdx.x * blockDim.x;
     int j = position / width;
@@ -179,7 +179,7 @@ extern "C"
         for (i = 0; i < image->n_images; i++)
         {
             cudaMemcpy(output_image, image->p[i], first_image_size * sizeof(pixel), cudaMemcpyHostToDevice);
-            apply_gray_filter_image_gpu<<<dimGrid, dimBlock>>>(output_image, width, height);
+            apply_gray_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(output_image, width, height);
             cudaMemcpy(image->p[i], output_image, first_image_size * sizeof(pixel), cudaMemcpyDeviceToHost);
         }
 
@@ -215,7 +215,7 @@ extern "C"
             do
             {
                 n_iter++;
-                apply_blur_filter_image_gpu<<<dimGrid, dimBlock>>>(temp_image, output_image, end_device, width, height, blur_size, threshold);
+                apply_blur_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, end_device, width, height, blur_size, threshold);
                 cudaMemcpy(&end, end_device, sizeof(int), cudaMemcpyDeviceToHost);
             } while (threshold > 0 && !end);
             cudaMemcpy(image->p[i], output_image, first_image_size * sizeof(pixel), cudaMemcpyDeviceToHost);
@@ -246,7 +246,7 @@ extern "C"
         for (i = 0; i < image->n_images; i++)
         {
             cudaMemcpy(temp_image, image->p[i], first_image_size * sizeof(pixel), cudaMemcpyHostToDevice);
-            apply_sobel_filter_image_gpu<<<dimGrid, dimBlock>>>(temp_image, output_image, width, height);
+            apply_sobel_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, width, height);
             cudaMemcpy(image->p[i], output_image, first_image_size * sizeof(pixel), cudaMemcpyDeviceToHost);
         }
 
@@ -279,18 +279,56 @@ void apply_all_filters_gif_gpu(animated_gif *image, int blur_size, int threshold
     for (i = 0; i < image->n_images; i++)
     {
         cudaMemcpy(temp_image, image->p[i], first_image_size * sizeof(pixel), cudaMemcpyHostToDevice);
-        apply_gray_filter_image_gpu<<<dimGrid, dimBlock>>>(temp_image, width, height);
+        apply_gray_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, width, height);
         int n_iter = 0;
         end = 1;
         do
         {
             n_iter++;
-            apply_blur_filter_image_gpu<<<dimGrid, dimBlock>>>(temp_image, output_image, end_device, width, height, blur_size, threshold);
+            apply_blur_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, end_device, width, height, blur_size, threshold);
             cudaMemcpy(&end, end_device, sizeof(int), cudaMemcpyDeviceToHost);
         } while (threshold > 0 && !end);
-        apply_sobel_filter_image_gpu<<<dimGrid, dimBlock>>>(temp_image, output_image, width, height);
+        apply_sobel_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, width, height);
         cudaMemcpy(image->p[i], output_image, first_image_size * sizeof(pixel), cudaMemcpyDeviceToHost);
     }
+
+    cudaFree(temp_image);
+    cudaFree(output_image);
+    cudaFree(end_device);
+}
+
+void apply_all_filters_image_gpu(animated_gif *image, int rank, int blur_size, int threshold)
+{
+    int width = image->width[rank];
+    int height = image->height[rank];
+    int end = 0;
+    int first_image_size = width * height;
+
+    int *end_device;
+
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+
+    dim3 dimGrid(10 * first_image_size / deviceProp.maxThreadsPerBlock + 1);
+    dim3 dimBlock(deviceProp.maxThreadsPerBlock / 10);
+
+    pixel *temp_image, *output_image;
+    cudaMalloc(&temp_image, first_image_size * sizeof(pixel));
+    cudaMalloc(&output_image, first_image_size * sizeof(pixel));
+    cudaMalloc(&end_device, sizeof(int));
+
+    cudaMemcpy(temp_image, image->p[rank], first_image_size * sizeof(pixel), cudaMemcpyHostToDevice);
+    apply_gray_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, width, height);
+    int n_iter = 0;
+    end = 1;
+    do
+    {
+        n_iter++;
+        apply_blur_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, end_device, width, height, blur_size, threshold);
+        cudaMemcpy(&end, end_device, sizeof(int), cudaMemcpyDeviceToHost);
+    } while (threshold > 0 && !end);
+    apply_sobel_filter_image_gpu_kernel<<<dimGrid, dimBlock>>>(temp_image, output_image, width, height);
+    cudaMemcpy(image->p[rank], output_image, first_image_size * sizeof(pixel), cudaMemcpyDeviceToHost);
 
     cudaFree(temp_image);
     cudaFree(output_image);
