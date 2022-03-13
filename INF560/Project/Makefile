@@ -7,6 +7,9 @@ MPI_INCS=$(MPI_INSTALL)/include
 MPI_LIB=$(MPI_INSTALL)/lib64
 CUDA_LIB=/usr/local/cuda/lib64
 
+export CPATH=$CPATH:/usr/local/cuda/include
+export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/cuda/lib64
+
 CC=mpicc
 NVCC=nvcc
 CFLAGS=-O3 -I$(HEADER_DIR) -fopenmp
@@ -89,10 +92,6 @@ cuda:
 	./clean_test.sh
 	clear
 	./run_test_cuda.sh
-
-cudafix:
-	export CPATH=$CPATH:/usr/local/cuda/include
-	export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/cuda/lib64
 
 fullclean:
 	make clean
