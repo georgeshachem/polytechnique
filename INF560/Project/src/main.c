@@ -11,6 +11,7 @@
 #include "filters.h"
 #include "cfilters.h"
 #include "filters_omp.h"
+#include "filters_part.h"
 #include "utils.h"
 #include "pgdatatypes.h"
 
