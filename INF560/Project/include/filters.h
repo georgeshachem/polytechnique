@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "pgdatatypes.h"
 #include <mpi.h>
-#include <omp.h>
 
 void apply_gray_filter_image(pixel *p, int width, int height);
 void apply_gray_filter_gif(animated_gif *image);

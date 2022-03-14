@@ -10,6 +10,7 @@
 
 #include "filters.h"
 #include "cfilters.h"
+#include "filters_omp.h"
 #include "utils.h"
 #include "pgdatatypes.h"
 
@@ -103,9 +104,9 @@ int main(int argc, char **argv)
         }
         else
         {
-            // apply_gray_filter_gif(image);
-            // apply_blur_filter_gif(image, 5, 20);
-            // apply_sobel_filter_gif(image);
+            // apply_gray_filter_gif_omp(image);
+            // apply_blur_filter_gif_omp(image, 5, 20);
+            // apply_sobel_filter_gif_omp(image);
             apply_all_filters_gif_gpu(image, 5, 20);
         }
 

@@ -28,6 +28,7 @@ SRC= dgif_lib.c \
 	filters.c \
 	filters_part.c \
 	utils.c \
+	filters_omp.c \
 	cfilters.cu
 
 
@@ -43,6 +44,7 @@ OBJ= $(OBJ_DIR)/dgif_lib.o \
 	$(OBJ_DIR)/filters.o \
 	$(OBJ_DIR)/filters_part.o \
 	$(OBJ_DIR)/utils.o \
+	$(OBJ_DIR)/filters_omp.o \
 	$(OBJ_DIR)/cfilters.o
 
 all: $(OBJ_DIR) sobelf

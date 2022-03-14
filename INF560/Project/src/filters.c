@@ -11,7 +11,6 @@ void apply_gray_filter_image(pixel *p, int width, int height)
     int j;
     int size_img = width * height;
 
-#pragma omp parallel for schedule(static) private(j)
     for (j = 0; j < size_img; j++)
     {
         int moy;
@@ -35,7 +34,6 @@ void apply_gray_filter_gif(animated_gif *image)
 
     p = image->p;
 
-#pragma omp parallel for schedule(static) private(i)
     for (i = 0; i < image->n_images; i++)
     {
         apply_gray_filter_image(p[i], image->width[i], image->height[i]);
@@ -80,9 +78,6 @@ void apply_blur_filter_image(pixel *p, int size, int threshold, int width, int h
         end = 1;
         n_iter++;
 
-#pragma omp parallel
-        {
-#pragma omp for collapse(2) private(j, k) firstprivate(new, p, width, height, size) schedule(static) nowait
             for (j = 0; j < height - 1; j++)
             {
                 for (k = 0; k < width - 1; k++)
@@ -93,7 +88,6 @@ void apply_blur_filter_image(pixel *p, int size, int threshold, int width, int h
                 }
             }
 
-#pragma omp for collapse(2) private(j, k) firstprivate(new, p, width, height, size) schedule(static) nowait
             /* Apply blur on top part of image (10%) */
             for (j = size; j < height / 10 - size; j++)
             {
@@ -157,7 +151,6 @@ void apply_blur_filter_image(pixel *p, int size, int threshold, int width, int h
                 }
             }
 
-#pragma omp for collapse(2) private(j, k) firstprivate(new, p, width, height, size) schedule(static) nowait
             for (j = 1; j < height - 1; j++)
             {
                 for (k = 1; k < width - 1; k++)
@@ -183,7 +176,6 @@ void apply_blur_filter_image(pixel *p, int size, int threshold, int width, int h
                     p[CONV(j, k, width)].b = new[CONV(j, k, width)].b;
                 }
             }
-        }
     } while (threshold > 0 && !end);
 
 #if SOBELF_DEBUG
@@ -205,7 +197,6 @@ void apply_blur_filter_gif(animated_gif *image, int size, int threshold)
     p = image->p;
 
     /* Process all images */
-#pragma omp parallel for schedule(static) private(i, width, height)
     for (i = 0; i < image->n_images; i++)
     {
         width = image->width[i];
@@ -222,9 +213,6 @@ void apply_sobel_filter_image(pixel *p, int width, int height)
 
     sobel = (pixel *)malloc(width * height * sizeof(pixel));
 
-#pragma omp parallel
-    {
-#pragma omp for collapse(2) private(j, k) firstprivate(p, sobel, width, height) schedule(static)
         for (j = 1; j < height - 1; j++)
         {
             for (k = 1; k < width - 1; k++)
@@ -268,7 +256,6 @@ void apply_sobel_filter_image(pixel *p, int width, int height)
             }
         }
 
-#pragma omp for collapse(2) private(j, k) firstprivate(p, sobel, width, height) schedule(static)
         for (j = 1; j < height - 1; j++)
         {
             for (k = 1; k < width - 1; k++)
@@ -278,7 +265,6 @@ void apply_sobel_filter_image(pixel *p, int width, int height)
                 p[CONV(j, k, width)].b = sobel[CONV(j, k, width)].b;
             }
         }
-    }
     free(sobel);
 }
 
@@ -292,7 +278,6 @@ void apply_sobel_filter_gif(animated_gif *image)
     p = image->p;
 
     /* Process all images */
-#pragma omp parallel for schedule(static) private(i, width, height)
     for (i = 0; i < image->n_images; i++)
     {
         width = image->width[i];
