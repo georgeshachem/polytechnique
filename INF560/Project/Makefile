@@ -26,6 +26,7 @@ SRC= dgif_lib.c \
 	openbsd-reallocarray.c \
 	quantize.c \
 	filters.c \
+	filters_part.c \
 	utils.c \
 	cfilters.cu
 
@@ -40,6 +41,7 @@ OBJ= $(OBJ_DIR)/dgif_lib.o \
 	$(OBJ_DIR)/openbsd-reallocarray.o \
 	$(OBJ_DIR)/quantize.o \
 	$(OBJ_DIR)/filters.o \
+	$(OBJ_DIR)/filters_part.o \
 	$(OBJ_DIR)/utils.o \
 	$(OBJ_DIR)/cfilters.o
 
@@ -92,6 +94,12 @@ cuda:
 	./clean_test.sh
 	clear
 	./run_test_cuda.sh
+
+part:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_part.sh
 
 fullclean:
 	make clean
