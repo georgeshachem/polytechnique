@@ -21,10 +21,12 @@
 int main(int argc, char **argv)
 {
     /* General variables */
-    int MPIMode = 2;
+    int MPIMode = 1;
 
     char *input_filename;
     char *output_filename;
+    int cuda_available;
+    int omp_threads_num;
     animated_gif *image;
     struct timeval t1, t2;
     double duration;
@@ -71,7 +73,7 @@ int main(int argc, char **argv)
     /* End MPI Config */
 
     /* Check command-line arguments */
-    if (argc < 3)
+    if (argc < 5)
     {
         fprintf(stderr, "Usage: %s input.gif output.gif \n", argv[0]);
         return 1;
@@ -79,22 +81,22 @@ int main(int argc, char **argv)
 
     input_filename = argv[1];
     output_filename = argv[2];
+    cuda_available = atoi(argv[3]);
+    omp_threads_num = atoi(argv[4]);
 
+    /* IMPORT Timer start */
+    gettimeofday(&t1, NULL);
     /* Load file and store the pixels in array */
     image = load_pixels(input_filename);
     if (image == NULL)
     {
         return 1;
     }
+    /* IMPORT Timer stop */
+    gettimeofday(&t2, NULL);
 
     if (rank == 0)
     {
-        /* IMPORT Timer start */
-        gettimeofday(&t1, NULL);
-
-        /* IMPORT Timer stop */
-        gettimeofday(&t2, NULL);
-
         duration = (t2.tv_sec - t1.tv_sec) + ((t2.tv_usec - t1.tv_usec) / 1e6);
 
         printf("GIF loaded from file %s with %d image(s) in %lf s\n",
@@ -111,9 +113,26 @@ int main(int argc, char **argv)
         /* send the tasks */
         int task;
         int dest_rank;
+        int max_pixels_num = 1000000;
 
-        if (size > 2)
+        if (cuda_available == 1 || omp_threads_num > 1)
         {
+            if (omp_threads_num > 1 && (((image->width[0] * image->height[0]) < max_pixels_num) || cuda_available == 0))
+            {
+                printf("Runnnig OMP \n");
+                apply_gray_filter_gif_omp(image);
+                apply_blur_filter_gif_omp(image, 5, 20);
+                apply_sobel_filter_gif_omp(image);
+            }
+            else
+            {
+                printf("Runnnig Cuda \n");
+                apply_all_filters_gif_gpu(image, 5, 20);
+            }
+        }
+        else if (size > 2)
+        {
+            printf("Runnnig MPI \n");
             if (MPIMode == 1)
             {
                 req = malloc(sizeof(MPI_Request) * image->n_images);
@@ -148,9 +167,7 @@ int main(int argc, char **argv)
 
                 for (img_index = 0; img_index < image->n_images; img_index++)
                 {
-                    // int img_size = image->width[img_index] * image->height[img_index];
                     int img_part_size = image->height[img_index] / (size - 1);
-                    // printf("img_index %d - img_size %d - img_part_size %d\n", img_index, img_size, img_part_size);
 
                     offset = 0;
                     for (task = 0; task < (size - 1); task++)
@@ -162,7 +179,6 @@ int main(int argc, char **argv)
                         {
                             stop = image->height[img_index];
                         }
-                        // printf("Image #%d from %d to %d\n", img_index, start, stop);
                         img_part.img_idx = img_index;
                         img_part.start = start;
                         img_part.stop = stop;
@@ -191,41 +207,40 @@ int main(int argc, char **argv)
                     }
                 }
             }
+            /* send a message that tell the workers to stop */
+            for (dest_rank = 1; dest_rank < size; dest_rank++)
+            {
+                int ready;
+                MPI_Recv(&ready, 1, MPI_INTEGER, dest_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                if (MPIMode == 1)
+                {
+                    int stop_value = -1;
+                    MPI_Send(&stop_value, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
+                }
+                else
+                {
+                    image_part stop_img_part;
+                    stop_img_part.img_idx = -1;
+                    MPI_Send(&stop_img_part, 1, MPI_ImagePart, dest_rank, 0, MPI_COMM_WORLD);
+                }
+            }
+
+            if (size > 1 && MPIMode == 1)
+            {
+                /* wait until all the results are received */
+                MPI_Waitall(image->n_images, req, MPI_STATUSES_IGNORE);
+            }
+
+            /* End of MPI */
         }
         else
         {
-            // apply_gray_filter_gif_omp(image);
-            // apply_blur_filter_gif_omp(image, 5, 20);
-            // apply_sobel_filter_gif_omp(image);
-            apply_all_filters_gif_gpu(image, 5, 20);
+            printf("Runnnig Original \n");
+            apply_gray_filter_gif(image);
+            apply_blur_filter_gif(image, 5, 20);
+            apply_sobel_filter_gif(image);
         }
-
-        /* send a message that tell the workers to stop */
-        for (dest_rank = 1; dest_rank < size; dest_rank++)
-        {
-            int ready;
-            MPI_Recv(&ready, 1, MPI_INTEGER, dest_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            if (MPIMode == 1)
-            {
-                int stop_value = -1;
-                MPI_Send(&stop_value, 1, MPI_INTEGER, dest_rank, 0, MPI_COMM_WORLD);
-            }
-            else
-            {
-                image_part stop_img_part;
-                stop_img_part.img_idx = -1;
-                MPI_Send(&stop_img_part, 1, MPI_ImagePart, dest_rank, 0, MPI_COMM_WORLD);
-            }
-        }
-
-        if (size > 1 && MPIMode == 1)
-        {
-            /* wait until all the results are received */
-            MPI_Waitall(image->n_images, req, MPI_STATUSES_IGNORE);
-        }
-
-        /* End of MPI */
 
         /* FILTER Timer stop */
         gettimeofday(&t2, NULL);
@@ -263,10 +278,10 @@ int main(int argc, char **argv)
                 {
                     break;
                 }
-                // apply_gray_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
-                // apply_blur_filter_image(image->p[img_idx], 5, 20, image->width[img_idx], image->height[img_idx]);
-                // apply_sobel_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
-                apply_all_filters_image_gpu(image, img_idx, 5, 20);
+                apply_gray_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+                apply_blur_filter_image(image->p[img_idx], 5, 20, image->width[img_idx], image->height[img_idx]);
+                apply_sobel_filter_image(image->p[img_idx], image->width[img_idx], image->height[img_idx]);
+                // apply_all_filters_image_gpu(image, img_idx, 5, 20);
                 MPI_Send(image->p[img_idx], image->height[img_idx] * image->width[img_idx], MPI_Pixel, 0, 0, MPI_COMM_WORLD);
             }
         }

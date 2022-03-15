@@ -109,6 +109,12 @@ part:
 	clear
 	./run_test_part.sh
 
+final:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_final.sh
+
 fullclean:
 	make clean
 	./clean_test.sh
