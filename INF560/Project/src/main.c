@@ -184,8 +184,7 @@ int main(int argc, char **argv)
                         {
                             stop = image->height[img_index];
                         }
-                        // printf("Copying image #%d from %d to %d\n", img_index, start, stop);
-                        for (i = start; i <= stop; i++)
+                        for (i = start; i < stop; i++)
                         {
                             image->p[img_index][i] = output_image->p[task][i];
                         }
@@ -283,9 +282,12 @@ int main(int argc, char **argv)
                     break;
                 }
                 // apply_all_filters_image_gpu(image, img_part.img_idx, 5, 20);
-                apply_gray_filter_gif_part(image, img_part.start - 2, img_part.stop + 2);
-                apply_blur_filter_gif_part(image, 5, 20, img_part.start, img_part.stop);
-                apply_sobel_filter_gif_part(image, img_part.start, img_part.stop);
+                int margin = image->height[img_part.img_idx] * 0.03;
+                img_part.start = img_part.start - margin;
+                img_part.stop = img_part.stop + margin;
+                apply_gray_filter_image_part(image->p[img_part.img_idx], image->width[img_part.img_idx], image->height[img_part.img_idx], img_part.start, img_part.stop);
+                apply_blur_filter_image_part(image->p[img_part.img_idx], 5, 20, image->width[img_part.img_idx], image->height[img_part.img_idx], img_part.start, img_part.stop);
+                apply_sobel_filter_image_part(image->p[img_part.img_idx], image->width[img_part.img_idx], image->height[img_part.img_idx], img_part.start, img_part.stop);
                 MPI_Send(image->p[img_part.img_idx], image->height[img_part.img_idx] * image->width[img_part.img_idx], MPI_Pixel, 0, 0, MPI_COMM_WORLD);
             }
         }
