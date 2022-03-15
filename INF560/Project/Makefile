@@ -79,6 +79,12 @@ mpi:
 	clear
 	./run_test_mpi.sh
 
+mpi2:
+	make clean
+	./clean_test.sh
+	clear
+	./run_test_mpi2.sh
+
 omp:
 	make clean
 	./clean_test.sh

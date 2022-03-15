@@ -22,4 +22,12 @@ typedef struct animated_gif
                          DO NOT MODIFY */
 } animated_gif;
 
+typedef struct image_part
+{
+    int img_idx;
+    int start;
+    int stop;
+    int pos;
+} image_part;
+
 #endif
